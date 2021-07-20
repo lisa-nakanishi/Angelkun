@@ -36,7 +36,7 @@ public class TimeCountDown : MonoBehaviour
         if (timeToDisplay < 0)
         {
             timeToDisplay = 0;
-            Invoke("ChangeSceneOver", 1f);
+            Invoke("ChangeSceneOver", 0f);
         }
         //分と秒を計算
         float minutes = Mathf.FloorToInt(timeToDisplay / 60);
