@@ -25,5 +25,10 @@ public class DestroyItem : MonoBehaviour
             Debug.Log("ボム削除");
 
         }
+        else if(colision.collider.tag == "BinTag")
+        {
+            Destroy(colision.gameObject);
+            Debug.Log("瓶削除");
+        }
     }
 }

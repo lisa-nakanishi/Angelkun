@@ -1,11 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
-public class PlayerMove : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
+    //時間のテキスト
+    public Text timeText;
+    //スコアを表示するテキスト
+    public GameObject scoreText;
+    //スコアを初期化
+    private int score = 0;
     GameObject player;
-   
+
     //移動する範囲を制限するための宣言
     float posiX;
     float x;
@@ -13,7 +21,7 @@ public class PlayerMove : MonoBehaviour
     private Animator anim = null;
     private Rigidbody2D rb2d = null;
     //インスペクタ―で設定する
-    private float speed=2.0f;
+    private float speed = 2.0f;
 
     private bool isLButtonDown = false;
     private bool isRButtonDown = false;
@@ -31,15 +39,15 @@ public class PlayerMove : MonoBehaviour
         //速度を0に設定
         float xSpeed = 0.0f;
         float horizontalKey = Input.GetAxis("Horizontal");
-        
-        if ((horizontalKey > 0)|| this.isRButtonDown)
+
+        if ((horizontalKey > 0) || this.isRButtonDown)
         {
             transform.localScale = new Vector3(0.18f, 0.18f, 0.18f);
             anim.SetBool("Walk", true);
 
             xSpeed = speed;
         }
-        else if ((horizontalKey )< 0|| this.isLButtonDown)
+        else if ((horizontalKey) < 0 || this.isLButtonDown)
         {
             transform.localScale = new Vector3(-0.18f, 0.18f, 0.18f);
             anim.SetBool("Walk", true);
@@ -53,7 +61,10 @@ public class PlayerMove : MonoBehaviour
         //velocity（速さ）代入
         rb2d.velocity = new Vector2(xSpeed, rb2d.velocity.y);
 
-       
+
+        // scoreTextにスコアを表示
+        this.scoreText.GetComponent<Text>().text = "Score:" + score.ToString();
+
         Clamp();
     }
     void Clamp()
@@ -93,9 +104,10 @@ public class PlayerMove : MonoBehaviour
     {
         this.isRButtonDown = false;
     }
-
     void OnCollisionEnter2D(Collision2D colision)
     {
+        string Tag = colision.gameObject.tag;
+        
         //ボムに衝突した場合
         if (colision.collider.tag == "BomTag")
         {
@@ -104,32 +116,24 @@ public class PlayerMove : MonoBehaviour
             Destroy(colision.gameObject);
             Debug.Log("当たった");
 
-            StartCoroutine("Attack");
-            //アニメーションを１秒後無効化にするための関数の名前
-            Invoke("offAnime", 1f);
+            speed = 0.0f;
+            anim.SetBool("Walk", false);
+
+
+            //ゲームオーバーの画像を表示し、オブジェクト等を削除
+            SceneManager.LoadScene("GameOverScenes");
+
+            
+        }
+        //瓶に衝突した場合
+        else if (colision.collider.tag == "BinTag")
+        {
+            score += 10;
+            Destroy(colision.gameObject);
+            Debug.Log("哺乳瓶に当たった");
            
         }
+        
 
     }
-   //一時的に動けないようにする
-    private IEnumerator Attack()
-    {
-        //動かせないようにスピードを0にする
-        speed = 0.0f;
-       
-         yield return new WaitForSeconds(2.0f);
-        Debug.Log("スタートから1秒後停止開始");
-        
-        speed = 2.0f;
-    }
-    //Overアニメーション無効化するためのメゾット開始
-    void offAnime()
-    {
-        
-        Debug.Log("アニメーション無効");
-        anim.SetBool("Over", false);
-        
-    }
-   
 }
-
